@@ -19,12 +19,12 @@ import (
 )
 
 const (
-	baseURL        = "https://api.binance.com/api/v3"
-	testnetBaseURL = "https://testnet.binance.vision/api/v3"
-	recvWindow     = "5000" // How long a request is valid in milliseconds
-	OrderTypeMarket   = "MARKET"
-	OrderSideBuy      = "BUY"
-	OrderSideSell     = "SELL"
+	baseURL         = "https://api.binance.com/api/v3"
+	testnetBaseURL  = "https://testnet.binance.vision/api/v3"
+	recvWindow      = "5000" // How long a request is valid in milliseconds
+	OrderTypeMarket = "MARKET"
+	OrderSideBuy    = "BUY"
+	OrderSideSell   = "SELL"
 )
 
 // RestClient is a client for the Binance REST API.
@@ -102,7 +102,7 @@ type TickerPrice struct {
 }
 
 // doRequest handles the actual request execution with rate limiting and retry logic.
-func (c *RestClient) doRequest(ctx context.Context, req *resty.Request) (*resty.Response, error) {
+func (c *RestClient) doRequest(ctx context.Context, method, url string, req *resty.Request) (*resty.Response, error) {
 	var resp *resty.Response
 	var err error
 	const maxRetries = 3
@@ -113,7 +113,7 @@ func (c *RestClient) doRequest(ctx context.Context, req *resty.Request) (*resty.
 			return nil, fmt.Errorf("rate limiter wait failed: %w", err)
 		}
 
-		resp, err = req.Send()
+		resp, err = req.Execute(method, url)
 
 		if err == nil && !resp.IsError() {
 			return resp, nil // Success
@@ -137,23 +137,23 @@ func (c *RestClient) doRequest(ctx context.Context, req *resty.Request) (*resty.
 		} else { // Network or other client-side errors
 			shouldRetry = true
 		}
-		
+
 		if !shouldRetry {
 			return nil, fmt.Errorf("request failed with status %s: %s", resp.Status(), resp.String())
 		}
-		
+
 		// If we should retry, calculate wait time
 		if retryAfter == 0 {
 			// Exponential backoff: 1s, 2s, 4s
 			retryAfter = time.Duration(math.Pow(2, float64(i))) * time.Second
 		}
-		
+
 		c.logger.Warn("Request failed, retrying...",
 			zap.Int("attempt", i+1),
 			zap.Duration("retry_after", retryAfter),
 			zap.Error(err),
 		)
-		
+
 		select {
 		case <-time.After(retryAfter):
 			continue
@@ -168,11 +168,13 @@ func (c *RestClient) doRequest(ctx context.Context, req *resty.Request) (*resty.
 // GetAllTickerPrices fetches the latest price for all symbols.
 func (c *RestClient) GetAllTickerPrices() (map[string]string, error) {
 	var prices []*TickerPrice
-	
-	req := c.client.R().SetResult(&prices)
+
+	req := c.client.R().
+		SetResult(&prices).
+		SetHeader("Content-Type", "application/json")
 	ctx := context.Background()
 
-	resp, err := c.doRequest(ctx, req.SetMethod("GET").SetHeader("Content-Type", "application/json").SetURL("/ticker/price"))
+	resp, err := c.doRequest(ctx, "GET", "/ticker/price", req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all ticker prices: %w", err)
 	}
@@ -208,15 +210,17 @@ type SymbolFilter struct {
 // GetExchangeInfo fetches exchange trading rules and symbol information.
 func (c *RestClient) GetExchangeInfo() (*ExchangeInfoResponse, error) {
 	var exchangeInfo ExchangeInfoResponse
-	
-	req := c.client.R().SetResult(&exchangeInfo)
+
+	req := c.client.R().
+		SetResult(&exchangeInfo).
+		SetHeader("Content-Type", "application/json")
 	ctx := context.Background()
 
-	resp, err := c.doRequest(ctx, req.SetMethod("GET").SetHeader("Content-Type", "application/json").SetURL("/exchangeInfo"))
+	resp, err := c.doRequest(ctx, "GET", "/exchangeInfo", req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get exchange info: %w", err)
 	}
-	
+
 	return resp.Result().(*ExchangeInfoResponse), nil
 }
 
@@ -246,7 +250,7 @@ func (c *RestClient) CreateOrder(symbol, side string, quantity float64) (*Create
 	params.Set("quantity", fmt.Sprintf("%f", quantity))
 	params.Set("timestamp", fmt.Sprintf("%d", time.Now().UnixMilli()))
 	params.Set("recvWindow", recvWindow)
-	
+
 	queryString := params.Encode()
 	signature := c.sign(queryString)
 	params.Set("signature", signature)
@@ -256,10 +260,10 @@ func (c *RestClient) CreateOrder(symbol, side string, quantity float64) (*Create
 		SetHeader("Content-Type", "application/x-www-form-urlencoded").
 		SetBody(params.Encode()).
 		SetResult(&CreateOrderResponse{})
-		
+
 	ctx := context.Background()
 
-	resp, err := c.doRequest(ctx, req.SetMethod("POST").SetURL("/order"))
+	resp, err := c.doRequest(ctx, "POST", "/order", req)
 	if err != nil {
 		c.logger.Error("Failed to create order after multiple attempts",
 			zap.Error(err),
