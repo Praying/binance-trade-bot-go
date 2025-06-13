@@ -1,0 +1,42 @@
+# Binance API Credentials
+# It's recommended to use environment variables for these in production.
+# export BINANCE_API_KEY=your_api_key
+# export BINANCE_SECRET_KEY=your_secret_key
+binance:
+  apiKey: ""
+  secretKey: ""
+  # Set to true to use the Binance Testnet, false for the production environment.
+  testnet: false
+
+# Trading settings
+trading:
+  # The bridge currency to use for triangular arbitrage
+  bridge: "USDT"
+  # List of coins to trade against the bridge currency.
+  # The bot will create pairs like "BTC/USDT", "ETH/USDT" etc.
+  trade_pairs:
+    - "BTC"
+    - "ETH"
+    - "BNB"
+  # The quantity of the trade coin to buy/sell in each transaction.
+  # e.g., if trading BTC/USDT, this would be the amount of BTC to trade.
+  quantity: 0.001
+  # The trading fee rate (e.g., 0.001 for 0.1%). This is crucial for profit calculation.
+  fee_rate: 0.001
+  # Set to true to log trades without executing them.
+  dry_run: true
+  # Time in seconds to wait between each scout cycle
+  tick_interval: 60
+
+# Logger settings
+logger:
+  level: "info" # debug, info, warn, error
+  format: "json" # json or console
+
+# Web Server settings
+server:
+  port: 8080
+
+# Database settings
+database:
+  dsn: "trades.db"

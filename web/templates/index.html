@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binance Trading Bot Status</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Trading Bot Status</h1>
+
+        <div id="status-container" class="status-card">
+            <h2>Current Holding</h2>
+            <p id="current-coin">Loading...</p>
+        </div>
+
+        <div id="trades-container" class="trades-card">
+            <h2>Trade History</h2>
+            <table id="trades-table">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Symbol</th>
+                        <th>Type</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                        <th>Simulation</th>
+                    </tr>
+                </thead>
+                <tbody id="trades-body">
+                    <!-- Trade rows will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
