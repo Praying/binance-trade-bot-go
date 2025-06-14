@@ -42,6 +42,7 @@ type Trading struct {
 	FeeRate      float64  `mapstructure:"fee_rate"`
 	DryRun       bool     `mapstructure:"dry_run"`
 	TickInterval int      `mapstructure:"tick_interval"`
+	ScoutMargin  float64  `mapstructure:"scout_margin"`
 }
 
 // Logger holds the configuration for the logger.
@@ -59,6 +60,10 @@ func LoadConfig(path string) (config Config, err error) {
 	// Allow environment variables to override config file
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
+	// Set default values
+	viper.SetDefault("binance.rate_limit", 20)      // requests per second
+	viper.SetDefault("binance.rate_limit_burst", 5) // burst size
 
 	err = viper.ReadInConfig()
 	if err != nil {

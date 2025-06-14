@@ -76,19 +76,14 @@ func (c *RestClient) GetServerTime() (int64, error) {
 		ServerTime int64 `json:"serverTime"`
 	}
 
-	resp, err := c.client.R().
-		SetResult(&ServerTimeResponse{}).
-		Get("/time")
+	req := c.client.R().
+		SetResult(&ServerTimeResponse{})
+	ctx := context.Background()
 
+	resp, err := c.doRequest(ctx, "GET", "/time", req)
 	if err != nil {
 		c.logger.Error("Failed to get server time", zap.Error(err))
-		return 0, err
-	}
-
-	if resp.IsError() {
-		err := fmt.Errorf("api error: %s", resp.String())
-		c.logger.Error("Failed to get server time", zap.String("status", resp.Status()), zap.String("body", resp.String()))
-		return 0, err
+		return 0, fmt.Errorf("failed to get server time: %w", err)
 	}
 
 	result := resp.Result().(*ServerTimeResponse)
@@ -113,6 +108,7 @@ func (c *RestClient) doRequest(ctx context.Context, method, url string, req *res
 			return nil, fmt.Errorf("rate limiter wait failed: %w", err)
 		}
 
+		c.logger.Debug("Executing request", zap.String("method", method), zap.String("url", c.client.BaseURL+url))
 		resp, err = req.Execute(method, url)
 
 		if err == nil && !resp.IsError() {
@@ -204,6 +200,8 @@ type SymbolInfo struct {
 // We are interested in the LOT_SIZE filter to get the stepSize.
 type SymbolFilter struct {
 	FilterType string `json:"filterType"`
+	MinQty     string `json:"minQty,omitempty"`
+	MaxQty     string `json:"maxQty,omitempty"`
 	StepSize   string `json:"stepSize,omitempty"`
 }
 
