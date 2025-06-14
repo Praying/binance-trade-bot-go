@@ -2,7 +2,7 @@
 
 [![Build Status](https://github.com/Praying/binance-trade-bot-go/actions/workflows/go.yml/badge.svg)](https://github.com/Praying/binance-trade-bot-go/actions/workflows/go.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/Praying/binance-trade-bot-go)](https://goreportcard.com/report/github.com/Praying/binance-trade-bot-go)
-[![Go Version](https://img.shields.io/badge/go-1.18%2B-blue.svg)](https://golang.org/)
+[![Go Version](https://img.shields.io/badge/go-1.23%2B-blue.svg)](https://golang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **Disclaimer:** This is a personal project and should not be used in a production environment. Cryptocurrency trading involves substantial risk of loss and is not suitable for every investor. All trading decisions are your own, and you are solely responsible for any losses that may occur.
@@ -19,7 +19,6 @@ This project is a high-performance cryptocurrency trading bot for Binance, rewri
 - **Reliable Order Placement**: Automatically formats order quantities to comply with Binance's `LOT_SIZE` rules, preventing rejections due to precision errors.
 - **Web Interface**: A clean, real-time web dashboard to monitor the bot's current holdings and view detailed trade history.
 
-  *(screenshot placeholder)*
 - **Testnet Support**: Easily switch between Binance's production and testnet environments via a simple configuration flag, allowing for safe testing.
 - **Persistent Trade History**: Every trade (both simulated and real) is recorded in a local SQLite database for analysis and auditing.
 - **Modern Stack**: Built with a robust stack including `Viper` for configuration, `Zap` for structured logging, and `GORM` for database interactions.
@@ -39,7 +38,7 @@ This project is a high-performance cryptocurrency trading bot for Binance, rewri
 .
 ├── cmd/                # Main applications
 │   ├── trader/         # The core trading bot application
-│   └── ui/             # The web interface server
+│   └── backend-api/             # The web interface server
 ├── configs/            # Configuration files
 │   └── config.example.yml
 ├── internal/           # Private application logic
@@ -59,7 +58,7 @@ This project is a high-performance cryptocurrency trading bot for Binance, rewri
 
 ### 1. Prerequisites
 
-- Go 1.18 or higher.
+- Go 1.23 or higher.
 
 ### 2. Configuration
 
@@ -93,7 +92,7 @@ You need to run two services in separate terminals.
 
 -   **Terminal 2: Start the Web UI Server**
     ```bash
-    go run cmd/ui/main.go
+    go run cmd/backend-api/main.go
     ```
     This launches the web server that provides the monitoring dashboard.
 

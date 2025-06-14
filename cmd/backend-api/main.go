@@ -216,7 +216,7 @@ func main() {
 		http.ServeFile(w, r, "web/templates/index.html")
 	})
 
-	addr := fmt.Sprintf(":%d", cfg.Server.Port)
+	addr := fmt.Sprintf("0.0.0.0:%d", cfg.Server.Port)
 	log.Info("Starting web server", zap.String("address", addr))
 
 	if err := http.ListenAndServe(addr, mux); err != nil {
