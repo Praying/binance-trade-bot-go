@@ -27,7 +27,16 @@ const (
 	OrderSideSell   = "SELL"
 )
 
+// RestClientInterface defines the interface for the Binance REST API client.
+type RestClientInterface interface {
+	GetServerTime() (int64, error)
+	GetAllTickerPrices() (map[string]string, error)
+	GetExchangeInfo() (*ExchangeInfoResponse, error)
+	CreateOrder(symbol, side string, quantity float64) (*CreateOrderResponse, error)
+}
+
 // RestClient is a client for the Binance REST API.
+// It implements the RestClientInterface.
 type RestClient struct {
 	client    *resty.Client
 	apiKey    string
@@ -35,6 +44,9 @@ type RestClient struct {
 	logger    *zap.Logger
 	limiter   *rate.Limiter
 }
+
+// ensure RestClient implements the interface
+var _ RestClientInterface = (*RestClient)(nil)
 
 // NewRestClient creates a new Binance REST API client.
 func NewRestClient(cfg *config.Binance, logger *zap.Logger) *RestClient {
@@ -191,14 +203,14 @@ type ExchangeInfoResponse struct {
 
 // SymbolInfo contains information about a specific trading symbol.
 type SymbolInfo struct {
-	Symbol  string         `json:"symbol"`
-	Status  string         `json:"status"`
-	Filters []SymbolFilter `json:"filters"`
+	Symbol  string   `json:"symbol"`
+	Status  string   `json:"status"`
+	Filters []Filter `json:"filters"`
 }
 
-// SymbolFilter represents a single filter for a symbol.
+// Filter represents a single filter for a symbol.
 // We are interested in the LOT_SIZE filter to get the stepSize.
-type SymbolFilter struct {
+type Filter struct {
 	FilterType string `json:"filterType"`
 	MinQty     string `json:"minQty,omitempty"`
 	MaxQty     string `json:"maxQty,omitempty"`

@@ -63,7 +63,10 @@ func findBestJump(ctx StrategyContext, fromCoin *models.Coin, prices map[string]
 
 // calculateProfitForPair is the core profit calculation logic.
 func calculateProfitForPair(ctx StrategyContext, pair *models.Pair, prices map[string]string) (float64, error) {
-	bridge := ctx.Cfg.Trading.Bridge
+	bridge := "USDT" // Default to USDT for now
+	if ctx.Cfg.Trading.Bridge != "" {
+		bridge = ctx.Cfg.Trading.Bridge
+	}
 
 	if pair.ToCoinSymbol == bridge {
 		return 0, nil
@@ -180,22 +183,19 @@ func ExecuteJump(ctx StrategyContext, pair *models.Pair, fromCoinQuantity float6
 		return err
 	}
 
-	var bridgeQtyObtained float64
-	if ctx.Cfg.Trading.DryRun {
-		l.Warn("[Dry Run] Simulating SELL order", zap.String("symbol", sellSymbol))
-		prices, _ := ctx.RestClient.GetAllTickerPrices()
-		price, _ := strconv.ParseFloat(prices[sellSymbol], 64)
-		bridgeQtyObtained = formattedSellQty * price * (1 - ctx.Cfg.Trading.FeeRate)
-	} else {
-		// Real transaction logic would go here.
-		l.Error("Real transaction logic not implemented yet.")
-		return fmt.Errorf("real transaction not implemented")
+	sellOrder, err := ctx.RestClient.CreateOrder(sellSymbol, "SELL", formattedSellQty)
+	if err != nil {
+		return fmt.Errorf("failed to execute sell order for %s: %w", sellSymbol, err)
 	}
-	l.Info("Obtained bridge currency", zap.Float64("amount", bridgeQtyObtained))
+	// In a real scenario, we'd wait for the order to fill. For now, we simulate it.
+	prices, _ := ctx.RestClient.GetAllTickerPrices()
+	price, _ := strconv.ParseFloat(prices[sellSymbol], 64)
+	bridgeQtyObtained := formattedSellQty * price * (1 - ctx.Cfg.Trading.FeeRate)
+	l.Info("Sell order created", zap.Int64("orderId", sellOrder.OrderID))
 
 	// --- Step 2: Buy ToCoin with Bridge Coin ---
 	buySymbol := toCoin + bridge
-	prices, _ := ctx.RestClient.GetAllTickerPrices()
+	prices, _ = ctx.RestClient.GetAllTickerPrices()
 	toPrice, _ := strconv.ParseFloat(prices[buySymbol], 64)
 	if toPrice == 0 {
 		l.Error("Could not get price for ToCoin, aborting jump", zap.String("symbol", buySymbol))
@@ -208,13 +208,16 @@ func ExecuteJump(ctx StrategyContext, pair *models.Pair, fromCoinQuantity float6
 		return err
 	}
 
-	if ctx.Cfg.Trading.DryRun {
-		l.Warn("[Dry Run] Simulating BUY order", zap.String("symbol", buySymbol), zap.Float64("quantity", formattedBuyQty))
-	} else {
-		// Real transaction logic
-		l.Error("Real transaction logic not implemented yet.")
-		return fmt.Errorf("real transaction not implemented")
+	formattedBuyQty, err = formatQuantity(ctx, buySymbol, buyQuantity)
+	if err != nil {
+		l.Error("Failed to format buy quantity, aborting jump.", zap.Error(err))
+		return err
 	}
+	buyOrder, err := ctx.RestClient.CreateOrder(buySymbol, "BUY", formattedBuyQty)
+	if err != nil {
+		return fmt.Errorf("failed to execute buy order for %s: %w", buySymbol, err)
+	}
+	l.Info("Buy order created", zap.Int64("orderId", buyOrder.OrderID))
 
 	// --- Step 3: Update State (e.g., in-memory state or DB) ---
 	// This part is strategy-dependent and should be handled by the strategy itself

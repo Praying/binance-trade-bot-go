@@ -11,7 +11,7 @@ import (
 type StrategyContext struct {
 	Logger        *zap.Logger
 	Cfg           *config.Config
-	RestClient    *binance.RestClient
+	RestClient    binance.RestClientInterface
 	DB            *gorm.DB
 	ExchangeRules map[string]binance.SymbolInfo
 }

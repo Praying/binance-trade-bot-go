@@ -22,7 +22,8 @@ func (s *DefaultStrategy) Initialize(ctx StrategyContext) error {
 		return fmt.Errorf("could not fetch coins for initialization: %w", err)
 	}
 	if len(coins) == 0 {
-		return fmt.Errorf("no coins found in database to initialize strategy")
+		ctx.Logger.Warn("No coins found in the database. DefaultStrategy will not be able to trade.")
+		return nil
 	}
 
 	// In Python version, it could be specified in config, here we just pick one

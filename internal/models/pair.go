@@ -9,4 +9,5 @@ type Pair struct {
 	FromCoinSymbol string  `gorm:"uniqueIndex:idx_from_to"`
 	ToCoinSymbol   string  `gorm:"uniqueIndex:idx_from_to"`
 	Ratio          float64 `gorm:"not null"`
+	MinQty         float64 `gorm:"not null"`
 }
