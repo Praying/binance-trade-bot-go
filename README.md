@@ -19,7 +19,6 @@ This project is a high-performance cryptocurrency trading bot for Binance, rewri
 - **Reliable Order Placement**: Automatically formats order quantities to comply with Binance's `LOT_SIZE` rules, preventing rejections due to precision errors.
 - **Web Interface**: A clean, real-time web dashboard to monitor the bot's current holdings and view detailed trade history.
 
-  ![Web UI Screenshot](./docs/screenshot.png)
   *(screenshot placeholder)*
 - **Testnet Support**: Easily switch between Binance's production and testnet environments via a simple configuration flag, allowing for safe testing.
 - **Persistent Trade History**: Every trade (both simulated and real) is recorded in a local SQLite database for analysis and auditing.
