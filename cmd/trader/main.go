@@ -32,7 +32,7 @@ func main() {
 	log.Info("Configuration loaded")
 
 	// Initialize database
-	db, err := database.NewDatabase(cfg.Database.DSN)
+	db, err := database.NewDatabase(&cfg)
 	if err != nil {
 		log.Fatal("Failed to connect to database", zap.Error(err))
 	}
@@ -55,8 +55,23 @@ func main() {
 		cancel()
 	}()
 
-	// Initialize and run the trading engine
-	tradeEngine := trader.NewEngine(log, &cfg, restClient, db)
+	// --- Strategy and Engine Setup ---
+	var selectedStrategy trader.Strategy
+	strategyName := cfg.Trading.Strategy
+
+	switch strategyName {
+	case "Default":
+		selectedStrategy = &trader.DefaultStrategy{}
+	case "MultipleCoins":
+		selectedStrategy = &trader.MultipleCoinsStrategy{}
+	default:
+		log.Fatal("Invalid strategy specified in config", zap.String("strategy", strategyName))
+	}
+
+	log.Info("Using strategy", zap.String("strategy", selectedStrategy.Name()))
+
+	// Initialize and run the trading engine with the selected strategy
+	tradeEngine := trader.NewEngine(log, &cfg, restClient, db, selectedStrategy)
 	tradeEngine.Run(ctx)
 
 	log.Info("Bot has been shut down.")

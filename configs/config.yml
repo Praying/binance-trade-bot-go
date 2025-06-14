@@ -26,7 +26,9 @@ trading:
   # Set to true to log trades without executing them.
   dry_run: true
   # Time in seconds to wait between each scout cycle
-  tick_interval: 60
+  tick_interval: 5
+  # The trading strategy to use. Can be "Default" or "MultipleCoins".
+  strategy: "MultipleCoins"
 
 # Logger settings
 logger:

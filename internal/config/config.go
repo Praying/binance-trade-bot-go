@@ -43,6 +43,7 @@ type Trading struct {
 	DryRun       bool     `mapstructure:"dry_run"`
 	TickInterval int      `mapstructure:"tick_interval"`
 	ScoutMargin  float64  `mapstructure:"scout_margin"`
+	Strategy     string   `mapstructure:"strategy"`
 }
 
 // Logger holds the configuration for the logger.
