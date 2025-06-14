@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"binance-trade-bot-go/internal/binance"
 	"binance-trade-bot-go/internal/config"
@@ -72,7 +73,20 @@ func main() {
 
 	// Initialize and run the trading engine with the selected strategy
 	tradeEngine := trader.NewEngine(log, &cfg, restClient, db, selectedStrategy)
+
+	// Start the API server
+	apiServer := trader.NewAPIServer(tradeEngine, log)
+	apiServer.Start()
+
+	// Run the trading engine
 	tradeEngine.Run(ctx)
+
+	// Gracefully shutdown the API server
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer shutdownCancel()
+	if err := apiServer.Stop(shutdownCtx); err != nil {
+		log.Error("API server shutdown failed", zap.Error(err))
+	}
 
 	log.Info("Bot has been shut down.")
 }

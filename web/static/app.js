@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
+    const tradersBody = document.getElementById('traders-body');
     const tradesBody = document.getElementById('trades-body');
    
     const stats24h = {
@@ -13,6 +14,20 @@ document.addEventListener('DOMContentLoaded', function() {
     	profitable: document.getElementById('stats-all-profitable'),
     	winrate: document.getElementById('stats-all-winrate'),
     	profit: document.getElementById('stats-all-profit'),
+    };
+
+    const fetchTraders = async () => {
+        try {
+            const response = await fetch('/api/traders');
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const traders = await response.json();
+            renderTraders(traders);
+        } catch (error) {
+            console.error('Failed to fetch traders:', error);
+            tradersBody.innerHTML = '<tr><td colspan="5">Error loading traders.</td></tr>';
+        }
     };
 
     const fetchTrades = async () => {
@@ -91,12 +106,38 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
 
+    const renderTraders = (traders) => {
+        if (!traders || traders.length === 0) {
+            tradersBody.innerHTML = `<tr><td colspan="5">No trader instances found.</td></tr>`;
+            return;
+        }
+
+        tradersBody.innerHTML = '';
+
+        traders.forEach(trader => {
+            const row = document.createElement('tr');
+            const statusClass = trader.is_healthy ? 'status-healthy' : 'status-unhealthy';
+            const statusText = trader.is_healthy ? 'Healthy' : 'Unhealthy';
+
+            row.innerHTML = `
+                <td>${trader.name}</td>
+                <td>${trader.uuid}</td>
+                <td>${trader.strategy}</td>
+                <td>${trader.uptime}</td>
+                <td class="${statusClass}">${statusText}</td>
+            `;
+            tradersBody.appendChild(row);
+        });
+    };
+
     // Initial fetch
+    fetchTraders();
     fetchTrades();
     fetchStatistics();
 
     // Fetch data every 5 seconds
     setInterval(() => {
+        fetchTraders();
         fetchTrades();
         fetchStatistics();
     }, 5000);

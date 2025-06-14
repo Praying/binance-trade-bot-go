@@ -6,14 +6,32 @@
     <title>Binance Trading Bot Status</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="container">
         <h1>Trading Bot Status</h1>
 
-        <div id="statistics-container" class="statistics-card">
+        <div id="traders-container" class="card traders-card">
+            <h2>Trader Instances</h2>
+            <table id="traders-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>UUID</th>
+                        <th>Strategy</th>
+                        <th>Uptime</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="traders-body">
+                    <!-- Trader rows will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div id="statistics-container" class="card statistics-card">
             <h2>Statistics</h2>
             <div class="stats-grid">
                 <div class="stats-period">
@@ -33,7 +51,7 @@
             </div>
         </div>
 
-        <div id="trades-container" class="trades-card">
+        <div id="trades-container" class="card trades-card">
             <h2>Trade History</h2>
             <table id="trades-table">
                 <thead>
