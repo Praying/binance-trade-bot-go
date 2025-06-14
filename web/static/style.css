@@ -1,70 +1,109 @@
+:root {
+    --background-color: #121212;
+    --surface-color: #1E1E1E;
+    --primary-text-color: #E0E0E0;
+    --secondary-text-color: #B0B0B0;
+    --border-color: #444;
+    --green-color: #4CAF50;
+    --red-color: #F44336;
+    --blue-color: #2196F3;
+    --hover-color: #2a2a2a;
+}
+
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background-color: #f4f7f6;
-    color: #333;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--background-color);
+    color: var(--primary-text-color);
     margin: 0;
     padding: 20px;
+    line-height: 1.6;
 }
 
 .container {
-    max-width: 1000px;
+    max-width: 1200px;
     margin: 0 auto;
 }
 
 h1 {
-    color: #2c3e50;
+    color: #fff;
+    text-align: center;
+    margin-bottom: 40px;
+    font-weight: 600;
 }
 
 h2 {
-    color: #34495e;
-    border-bottom: 2px solid #ecf0f1;
+    color: var(--primary-text-color);
+    border-bottom: 2px solid var(--blue-color);
     padding-bottom: 10px;
+    margin-top: 0;
 }
 
-.status-card, .trades-card {
-    background-color: #ffffff;
+.status-card, .statistics-card, .trades-card {
+    background-color: var(--surface-color);
     border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    border: 1px solid var(--border-color);
 }
 
 #current-coin {
-    font-size: 1.5em;
+    font-size: 2em;
     font-weight: bold;
-    color: #2980b9;
+    color: var(--blue-color);
+    text-align: center;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.stats-period h3 {
+    color: var(--secondary-text-color);
+    font-size: 1.1em;
+    margin-bottom: 15px;
+}
+.stats-period p {
+    margin: 5px 0;
+    font-size: 1em;
+}
+.stats-period span {
+    font-weight: bold;
+    color: var(--primary-text-color);
 }
 
 #trades-table {
     width: 100%;
     border-collapse: collapse;
+    margin-top: 20px;
 }
 
 #trades-table th, #trades-table td {
-    padding: 12px 15px;
+    padding: 15px;
     text-align: left;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--border-color);
 }
 
 #trades-table th {
-    background-color: #ecf0f1;
-    font-weight: bold;
-}
-
-#trades-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
+    background-color: #252525;
+    font-weight: 600;
+    color: var(--secondary-text-color);
+    text-transform: uppercase;
+    font-size: 0.85em;
 }
 
 #trades-table tbody tr:hover {
-    background-color: #f1f1f1;
+    background-color: var(--hover-color);
 }
 
 .buy {
-    color: #27ae60;
+    color: var(--green-color);
     font-weight: bold;
 }
 
 .sell {
-    color: #c0392b;
+    color: var(--red-color);
     font-weight: bold;
 }

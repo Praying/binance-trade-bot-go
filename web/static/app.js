@@ -1,19 +1,18 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const statusElement = document.getElementById('current-coin');
     const tradesBody = document.getElementById('trades-body');
-
-    const fetchStatus = async () => {
-        try {
-            const response = await fetch('/api/status');
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            const data = await response.json();
-            statusElement.textContent = data.Symbol || 'N/A';
-        } catch (error) {
-            console.error('Failed to fetch status:', error);
-            statusElement.textContent = 'Error loading status';
-        }
+   
+    const stats24h = {
+    	total: document.getElementById('stats-24h-total'),
+    	profitable: document.getElementById('stats-24h-profitable'),
+    	winrate: document.getElementById('stats-24h-winrate'),
+    	profit: document.getElementById('stats-24h-profit'),
+    };
+   
+    const statsAll = {
+    	total: document.getElementById('stats-all-total'),
+    	profitable: document.getElementById('stats-all-profitable'),
+    	winrate: document.getElementById('stats-all-winrate'),
+    	profit: document.getElementById('stats-all-profit'),
     };
 
     const fetchTrades = async () => {
@@ -26,13 +25,41 @@ document.addEventListener('DOMContentLoaded', function() {
             renderTrades(trades);
         } catch (error) {
             console.error('Failed to fetch trades:', error);
-            tradesBody.innerHTML = '<tr><td colspan="7">Error loading trades.</td></tr>';
+            tradesBody.innerHTML = '<tr><td colspan="8">Error loading trades.</td></tr>';
         }
+    };
+   
+    const fetchStatistics = async () => {
+    	try {
+    		const response = await fetch('/api/statistics');
+    		if (!response.ok) {
+    			throw new Error('Network response was not ok');
+    		}
+    		const data = await response.json();
+    		renderStatistics(data);
+    	} catch (error) {
+    		console.error('Failed to fetch statistics:', error);
+    		// Optionally, display an error in the UI
+    	}
+    };
+    
+    const renderStatistics = (data) => {
+    	const { since_24h, all_time } = data;
+   
+    	stats24h.total.textContent = since_24h.total_trades;
+    	stats24h.profitable.textContent = since_24h.profitable_trades;
+    	stats24h.winrate.textContent = (since_24h.win_rate * 100).toFixed(2) + '%';
+    	stats24h.profit.textContent = since_24h.total_profit.toFixed(4);
+   
+    	statsAll.total.textContent = all_time.total_trades;
+    	statsAll.profitable.textContent = all_time.profitable_trades;
+    	statsAll.winrate.textContent = (all_time.win_rate * 100).toFixed(2) + '%';
+    	statsAll.profit.textContent = all_time.total_profit.toFixed(4);
     };
 
     const renderTrades = (trades) => {
         if (!trades || trades.length === 0) {
-            tradesBody.innerHTML = '<tr><td colspan="7">No trades found.</td></tr>';
+            tradesBody.innerHTML = `<tr><td colspan="8">No trades found.</td></tr>`;
             return;
         }
 
@@ -47,6 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const price = trade.Price.toFixed(4);
             const quantity = trade.Quantity.toFixed(6);
             const total = trade.QuoteQuantity.toFixed(4);
+            const profit = trade.profit ? trade.profit.toFixed(4) : 'N/A';
             const simulation = trade.IsSimulation ? 'Yes' : 'No';
 
             row.innerHTML = `
@@ -56,6 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${price}</td>
                 <td>${quantity}</td>
                 <td>${total}</td>
+                <td>${profit}</td>
                 <td>${simulation}</td>
             `;
             tradesBody.appendChild(row);
@@ -63,12 +92,12 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // Initial fetch
-    fetchStatus();
     fetchTrades();
+    fetchStatistics();
 
     // Fetch data every 5 seconds
     setInterval(() => {
-        fetchStatus();
         fetchTrades();
+        fetchStatistics();
     }, 5000);
 });

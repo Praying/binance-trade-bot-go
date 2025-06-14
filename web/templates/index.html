@@ -4,15 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Binance Trading Bot Status</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="container">
         <h1>Trading Bot Status</h1>
 
-        <div id="status-container" class="status-card">
-            <h2>Current Holding</h2>
-            <p id="current-coin">Loading...</p>
+        <div id="statistics-container" class="statistics-card">
+            <h2>Statistics</h2>
+            <div class="stats-grid">
+                <div class="stats-period">
+                    <h3>Since 24h</h3>
+                    <p>Total Trades: <span id="stats-24h-total">0</span></p>
+                    <p>Profitable: <span id="stats-24h-profitable">0</span></p>
+                    <p>Win Rate: <span id="stats-24h-winrate">0.00%</span></p>
+                    <p>Total Profit: <span id="stats-24h-profit">0.00</span></p>
+                </div>
+                <div class="stats-period">
+                    <h3>All Time</h3>
+                    <p>Total Trades: <span id="stats-all-total">0</span></p>
+                    <p>Profitable: <span id="stats-all-profitable">0</span></p>
+                    <p>Win Rate: <span id="stats-all-winrate">0.00%</span></p>
+                    <p>Total Profit: <span id="stats-all-profit">0.00</span></p>
+                </div>
+            </div>
         </div>
 
         <div id="trades-container" class="trades-card">
@@ -26,6 +44,7 @@
                         <th>Price</th>
                         <th>Quantity</th>
                         <th>Total</th>
+                        <th>Profit</th>
                         <th>Simulation</th>
                     </tr>
                 </thead>

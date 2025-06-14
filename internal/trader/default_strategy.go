@@ -66,7 +66,7 @@ func (s *DefaultStrategy) Scout(ctx StrategyContext) error {
 			zap.Float64("profit_margin", bestOpp.Profit))
 
 		// Execute the jump using the helper function
-		err := ExecuteJump(ctx, &bestOpp.Pair, ctx.Cfg.Trading.Quantity)
+		err := ExecuteJump(ctx, &bestOpp.Pair, ctx.Cfg.Trading.Quantity, bestOpp.Profit)
 		if err != nil {
 			l.Error("Failed to execute jump", zap.Error(err))
 			// If the jump fails, we don't update the coin, we'll retry on the next tick.

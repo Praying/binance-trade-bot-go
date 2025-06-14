@@ -12,4 +12,5 @@ type Trade struct {
 	QuoteQuantity float64 `json:"quote_quantity"`
 	Timestamp     int64   `json:"timestamp"`
 	IsSimulation  bool    `json:"is_simulation"`
+	Profit        float64 `json:"profit,omitempty"`
 }

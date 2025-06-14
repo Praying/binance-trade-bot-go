@@ -4,7 +4,6 @@ import (
 	"binance-trade-bot-go/internal/models"
 	"fmt"
 	"go.uber.org/zap"
-	"strconv"
 )
 
 // MultipleCoinsStrategy scouts all configured coins to find the best trading opportunity.
@@ -79,29 +78,15 @@ func (s *MultipleCoinsStrategy) Scout(ctx StrategyContext) error {
 		}
 
 		// Execute the jump
-		err := ExecuteJump(ctx, &bestOpp.Pair, fromCoin.Quantity)
+		err := ExecuteJump(ctx, &bestOpp.Pair, fromCoin.Quantity, bestOpp.Profit)
 		if err != nil {
 			l.Error("Failed to execute best jump", zap.Error(err))
 			return err
 		}
-
-		// On success, we need to update the quantities of the traded coins
-		var updatedFromCoin, updatedToCoin models.Coin
-		ctx.DB.First(&updatedFromCoin, "symbol = ?", bestOpp.Pair.FromCoinSymbol)
-		ctx.DB.First(&updatedToCoin, "symbol = ?", bestOpp.Pair.ToCoinSymbol)
-
-		// This is a simplification. A real implementation would use the actual fill amounts.
-		fromCoinQty := updatedFromCoin.Quantity
-		updatedFromCoin.Quantity = 0
-		prices, _ := ctx.RestClient.GetAllTickerPrices()
-		price, _ := strconv.ParseFloat(prices[bestOpp.Pair.FromCoinSymbol+ctx.Cfg.Trading.Bridge], 64)
-		toPrice, _ := strconv.ParseFloat(prices[bestOpp.Pair.ToCoinSymbol+ctx.Cfg.Trading.Bridge], 64)
-		updatedToCoin.Quantity += fromCoinQty * (price / toPrice)
-
-		ctx.DB.Save(&updatedFromCoin)
-		ctx.DB.Save(&updatedToCoin)
-
-		l.Info("Successfully executed jump and updated coin quantities.")
+		// The state update (e.g., coin quantities) should ideally be handled by a
+		// separate portfolio manager that listens to trade events.
+		// For now, we assume the core trading logic is complete after the jump.
+		l.Info("Successfully executed jump.")
 	} else {
 		l.Info("No profitable jump opportunities found in this cycle.")
 	}

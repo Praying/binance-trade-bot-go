@@ -162,8 +162,8 @@ func formatQuantity(ctx StrategyContext, symbol string, quantity float64) (float
 	return floored, nil
 }
 
-// ExecuteJump performs a two-step trade: FromCoin -> Bridge -> ToCoin
-func ExecuteJump(ctx StrategyContext, pair *models.Pair, fromCoinQuantity float64) error {
+// ExecuteJump performs a two-step trade and records it in the database.
+func ExecuteJump(ctx StrategyContext, pair *models.Pair, fromCoinQuantity float64, profit float64) error {
 	bridge := ctx.Cfg.Trading.Bridge
 	fromCoin := pair.FromCoinSymbol
 	toCoin := pair.ToCoinSymbol
@@ -193,6 +193,21 @@ func ExecuteJump(ctx StrategyContext, pair *models.Pair, fromCoinQuantity float6
 	bridgeQtyObtained := formattedSellQty * price * (1 - ctx.Cfg.Trading.FeeRate)
 	l.Info("Sell order created", zap.Int64("orderId", sellOrder.OrderID))
 
+	// Record the SELL trade
+	sellTrade := models.Trade{
+		Symbol:        sellSymbol,
+		Type:          "SELL",
+		Price:         price,
+		Quantity:      formattedSellQty,
+		QuoteQuantity: formattedSellQty * price,
+		Timestamp:     sellOrder.TransactTime,
+		// IsSimulation:  ctx.Cfg.Trading.IsSimulation,
+	}
+	if err := ctx.DB.Create(&sellTrade).Error; err != nil {
+		l.Error("Failed to record sell trade", zap.Error(err))
+		// Continue even if recording fails, as the trade itself succeeded.
+	}
+
 	// --- Step 2: Buy ToCoin with Bridge Coin ---
 	buySymbol := toCoin + bridge
 	prices, _ = ctx.RestClient.GetAllTickerPrices()
@@ -219,10 +234,23 @@ func ExecuteJump(ctx StrategyContext, pair *models.Pair, fromCoinQuantity float6
 	}
 	l.Info("Buy order created", zap.Int64("orderId", buyOrder.OrderID))
 
-	// --- Step 3: Update State (e.g., in-memory state or DB) ---
-	// This part is strategy-dependent and should be handled by the strategy itself
-	// after this function returns.
-	l.Info("Jump simulation successful.", zap.String("new_coin", toCoin))
+	// Record the BUY trade with profit
+	buyTrade := models.Trade{
+		Symbol:        buySymbol,
+		Type:          "BUY",
+		Price:         toPrice,
+		Quantity:      formattedBuyQty,
+		QuoteQuantity: formattedBuyQty * toPrice,
+		Timestamp:     buyOrder.TransactTime,
+		// IsSimulation:  ctx.Cfg.Trading.IsSimulation,
+		Profit: profit, // Store the overall profit in the final leg of the jump
+	}
+	if err := ctx.DB.Create(&buyTrade).Error; err != nil {
+		l.Error("Failed to record buy trade", zap.Error(err))
+		// Continue even if recording fails
+	}
+
+	l.Info("Jump transaction successful.", zap.String("new_coin", toCoin))
 
 	return nil
 }

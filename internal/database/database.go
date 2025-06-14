@@ -27,7 +27,7 @@ func NewDatabase(cfg *config.Config) (*gorm.DB, error) {
 // AutoMigrate drops existing tables, creates new ones, and populates initial data.
 func AutoMigrate(db *gorm.DB, cfg *config.Config) error {
 	// Drop all existing tables to ensure a clean state
-	if err := db.Migrator().DropTable(&models.Trade{}, &models.CurrentCoin{}, &models.Pair{}, &models.Coin{}); err != nil {
+	if err := db.Migrator().DropTable(&models.Trade{}, &models.Pair{}, &models.Coin{}); err != nil {
 		// We can ignore "not found" errors, but fail on others
 		if err.Error() != "table not found" {
 			return fmt.Errorf("failed to drop tables: %w", err)

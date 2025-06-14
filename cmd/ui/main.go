@@ -4,6 +4,7 @@ import (
 	"binance-trade-bot-go/internal/config"
 	"binance-trade-bot-go/internal/database"
 	"binance-trade-bot-go/internal/logger"
+	"binance-trade-bot-go/internal/models"
 	"fmt"
 	"net/http"
 	"os"
@@ -28,9 +29,15 @@ func main() {
 	defer log.Sync()
 
 	// Connect to the database
-	db, err := database.NewDatabase(cfg.Database.DSN)
+	db, err := database.NewDatabase(&cfg)
 	if err != nil {
 		log.Fatal("Failed to connect to database", zap.Error(err))
+	}
+
+	// Auto-migrate the schema
+	log.Info("Running database migrations...")
+	if err := db.AutoMigrate(&models.Coin{}, &models.Pair{}, &models.Trade{}); err != nil {
+		log.Fatal("Failed to migrate database", zap.Error(err))
 	}
 
 	// Setup HTTP server
@@ -40,8 +47,8 @@ func main() {
 	apiHandler := NewAPIHandler(log, db)
 
 	// API endpoints
-	mux.HandleFunc("/api/status", apiHandler.StatusHandler)
 	mux.HandleFunc("/api/trades", apiHandler.TradesHandler)
+	mux.HandleFunc("/api/statistics", apiHandler.StatisticsHandler)
 
 	// Static file serving for CSS, JS, etc.
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("web/static"))))
