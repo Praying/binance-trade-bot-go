@@ -6,6 +6,7 @@ import (
 
 	"binance-trade-bot-go/internal/binance"
 	"binance-trade-bot-go/internal/config"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -17,6 +18,9 @@ type Engine struct {
 	db         *gorm.DB
 	restClient *binance.RestClient
 	strategy   Strategy
+	UUID       string
+	Name       string
+	StartTime  time.Time
 }
 
 // NewEngine creates a new trading engine with a specific strategy.
@@ -27,6 +31,9 @@ func NewEngine(logger *zap.Logger, cfg *config.Config, restClient *binance.RestC
 		db:         db,
 		restClient: restClient,
 		strategy:   strategy,
+		UUID:       uuid.New().String(),
+		Name:       cfg.Trading.Name,
+		StartTime:  time.Now(),
 	}
 }
 

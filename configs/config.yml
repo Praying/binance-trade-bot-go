@@ -28,7 +28,11 @@ trading:
   # Time in seconds to wait between each scout cycle
   tick_interval: 5
   # The trading strategy to use. Can be "Default" or "MultipleCoins".
-  strategy: "MultipleCoins"
+  strategy: "Default"
+  # A human-readable name for this trader instance
+  name: "Default-Trader"
+  # Port for the trader's API server
+  api_port: 8081
 
 # Logger settings
 logger:
@@ -38,6 +42,9 @@ logger:
 # Web Server settings
 server:
   port: 8080
+  # List of trader API URLs for the UI to connect to.
+  trader_urls:
+    - "http://localhost:8081"
 
 # Database settings
 database:

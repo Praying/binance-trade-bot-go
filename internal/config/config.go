@@ -26,7 +26,8 @@ type Binance struct {
 
 // Server holds the configuration for the web server.
 type Server struct {
-	Port int `mapstructure:"port"`
+	Port       int      `mapstructure:"port"`
+	TraderURLs []string `mapstructure:"trader_urls"`
 }
 
 // Database holds the configuration for the database.
@@ -44,6 +45,8 @@ type Trading struct {
 	TickInterval int      `mapstructure:"tick_interval"`
 	ScoutMargin  float64  `mapstructure:"scout_margin"`
 	Strategy     string   `mapstructure:"strategy"`
+	Name         string   `mapstructure:"name"`
+	ApiPort      int      `mapstructure:"api_port"`
 }
 
 // Logger holds the configuration for the logger.
